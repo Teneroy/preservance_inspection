@@ -4,7 +4,8 @@
   "description": "Visual observation of the Preservance rover from different positions. A test task by one of German research institutes.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "webpack serve --config ./bundler/webpack.dev.js"
   },
   "repository": {
     "type": "git",
@@ -14,7 +15,25 @@
   "author": "Aleksei Chernyshov",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Teneroy/preservance_inspection/issues"
+    "url": "yeshttps://github.com/Teneroy/preservance_inspection/issues"
   },
-  "homepage": "https://github.com/Teneroy/preservance_inspection#readme"
+  "homepage": "https://github.com/Teneroy/preservance_inspection#readme",
+  "dependencies": {
+    "@babel/core": "^7.15.5",
+    "@babel/preset-env": "^7.15.4",
+    "babel-loader": "^8.2.2",
+    "copy-webpack-plugin": "^9.0.1",
+    "html-loader": "^2.1.2",
+    "internal-ip": "^6.2.0",
+    "three": "^0.132.2",
+    "webpack": "^5.52.0",
+    "webpack-merge": "^5.8.0"
+  },
+  "devDependencies": {
+    "html-webpack-plugin": "^5.3.2",
+    "mini-css-extract-plugin": "^2.2.2",
+    "portfinder-sync": "^0.0.2",
+    "webpack-cli": "^4.8.0",
+    "webpack-dev-server": "^4.1.0"
+  }
 }

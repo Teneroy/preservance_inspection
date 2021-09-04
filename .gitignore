@@ -105,3 +105,6 @@ dist
 
 #WebStorm files
 .idea/
+
+#Hide lock file
+package-lock.json
