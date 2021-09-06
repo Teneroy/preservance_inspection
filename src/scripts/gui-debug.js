@@ -1,4 +1,4 @@
-import * as dat from 'dat.gui';
+import * as dat from 'three/examples/jsm/libs/dat.gui.module';
 
 export default class GuiDebug {
     gui = new dat.GUI();

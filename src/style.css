@@ -8,7 +8,7 @@ html, body {
 }
 
 body {
-    background: rgba(246, 41, 41, 0.31);
+    background-image: url("img/background.jpeg");
 }
 
 .webgl {
