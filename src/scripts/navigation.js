@@ -9,9 +9,10 @@ export default class Navigation {
     viewpoints = new Set();
     cameraLabelGeometry;
     sizes;
+    currentCamera;
 
 
-    constructor(sizes) {
+    constructor(sizes, camera) {
         const cameraLabelHeight = 0.3;
         const cameraLabelRadius = 0.3;
         const cameraLabelRadialSegments = 8;
@@ -22,6 +23,7 @@ export default class Navigation {
         this.cameraLabelGeometry = new THREE.ConeGeometry(cameraLabelRadius, cameraLabelHeight, cameraLabelRadialSegments,
             cameraLabelHeightSegments, isCameraLabelOpenEnded, cameraLabelThetaStart);
         this.sizes = sizes;
+        this.currentCamera = camera;
 
         this.navigationGroup.add(this.labels);
         this.navigationGroup.add(this.cameras);
@@ -60,5 +62,14 @@ export default class Navigation {
         this.lights.add(pointLight);
 
         return pointLight;
+    }
+
+    findViewpointByLabel(label) {
+        for (let viewpoint of this.viewpoints) {
+            if(viewpoint.label === label) {
+                return viewpoint;
+            }
+        }
+        return null;
     }
 }
