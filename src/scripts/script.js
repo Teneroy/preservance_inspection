@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 //import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import GuiDebug from './gui-debug';
 import {Raycaster} from "three";
+import Navigation from "./navigation";
 
 //Scene vars
 const guiDebug = new GuiDebug();
@@ -40,17 +41,17 @@ const tick = () => {
     if(cam1 === false) {
         renderer.render(scene, camera);
     } else {
-        renderer.render(scene, camera2  );
+        renderer.render(scene, navigation.cameras.children[0]);
     }
 
     raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects(navigation.children);
+    const intersects = raycaster.intersectObjects(navigation.labels.children);
     if(intersects.length > 0) {
         intersects[0].object.material.color.set( 0x000000 );
     } else {
-        const navElems = navigation.children;
+        const navElems = navigation.labels.children;
         for (let i = 0; i < navElems.length; i++) {
-            navElems[0].material.color.set( 0x00ff00 );
+            navElems[i].material.color.set( 0x00ff00 );
         }
     }
 
@@ -68,7 +69,7 @@ const modelLoaderCallback = (gltf) => {
     guiDebug.addRotationDebugger(model, 'Rower rotation', rotationRange, rotationRange, rotationRange, 0.01);
     guiDebug.addPositionDebugger( model, 'Rower position', {min: -6, max: 6}, {min: -3, max: 3},
         {min: -3, max: 3}, 0.01);
-};
+}
 
 //Actions
 const camera = new THREE.PerspectiveCamera(50, sizes.width / sizes.height, 0.1, 100);
@@ -76,61 +77,43 @@ const camera = new THREE.PerspectiveCamera(50, sizes.width / sizes.height, 0.1, 
 camera.position.set(0, 3, 10);
 scene.add(camera);
 
-const navigation = new THREE.Group();
+const navigation = new Navigation(sizes);
 
 //Actions
-const cameraLabelGeometry = new THREE.ConeGeometry(0.3, 0.3, 8, 1, false, 0);
-const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-const secondCameraLabel = new THREE.Mesh(cameraLabelGeometry, material);
-secondCameraLabel.position.set(3, 0.23, 1.12);
-navigation.add(secondCameraLabel);
+const navStep = 1.1;
+const firstNavZ = 1.1;
+const lastNavZ = -1.1;
+for (let z = firstNavZ; z >= lastNavZ; z -= navStep) {
+    const viewpoint = navigation.addViewpoint({x: 3, y: 0.23, z: z}, {x: 0, y: 7.88, z: 0});
+    const light = navigation.highlightViewpoint(viewpoint);
 
-const camera2 = new THREE.PerspectiveCamera(45, sizes.width / sizes.height, 0.1, 100);
-camera2.rotation.set(0, 7.88, 0);
-camera2.position.set(3, 0.23, 1.12);
-scene.add(camera2);
+    if(light === null) {
+        continue;
+    }
+    const lightFolderName = ('Light with step: ' + z.toFixed(2));
+    guiDebug.addPositionDebugger(light, lightFolderName, {min: -6, max: 6}, {min: -3, max: 3},
+        {min: -3, max: 3}, 0.01);
+    guiDebug.getFolderByName(lightFolderName)
+        .add(light, 'intensity').min(0).max(10).step(0.01);
+}
 
-const camera3 = new THREE.PerspectiveCamera(45, sizes.width / sizes.height, 0.1, 100);
-camera3.rotation.set(0, 7.88, 0);
-camera3.position.set(3, 0.23, -0.08);
-scene.add(camera3);
-
-const camera4 = new THREE.PerspectiveCamera(45, sizes.width / sizes.height, 0.1, 100);
-camera4.rotation.set(0, 7.88, 0);
-camera4.position.set(3, 0.23, -1.1);
-scene.add(camera4);
-
-
-scene.add(navigation);
-
-const pointLight2 = new THREE.PointLight();
-pointLight2.position.set(3, 0.23, 1.12);
-pointLight2.rotation.set(0, 7.88, 0);
-scene.add(pointLight2);
-
-guiDebug.addPositionDebugger(pointLight2, 'Light2 position', {min: -6, max: 6}, {min: -3, max: 3},
-    {min: -3, max: 3}, 0.01);
-guiDebug.getFolderByName('Light2 position')
-    .add(pointLight2, 'intensity').min(0).max(10).step(0.01);
-
-const rotationRange = {min: 0, max: 9};
-guiDebug.addRotationDebugger(camera3, 'Camera rotation', rotationRange, rotationRange, rotationRange, 0.01);
-guiDebug.addPositionDebugger(camera3, 'Camera position', {min: -10, max: 10}, {min: -10, max: 10},
-    {min: -10, max: 10}, 0.01);
+scene.add(navigation.navigationGroup);
 
 const pointLight = new THREE.PointLight();
 pointLight.position.set(2, 6, 4);
 scene.add(pointLight);
 
+
 //Debugging
+const rotationRange = {min: 0, max: 9};
+guiDebug.addRotationDebugger(camera, 'Camera rotation', rotationRange, rotationRange, rotationRange, 0.01);
+guiDebug.addPositionDebugger(camera, 'Camera position', {min: -10, max: 10}, {min: -10, max: 10},
+    {min: -10, max: 10}, 0.01);
+
 guiDebug.addPositionDebugger(pointLight, 'Light position', {min: -6, max: 6}, {min: -3, max: 3},
     {min: -3, max: 3}, 0.01);
 guiDebug.getFolderByName('Light position')
     .add(pointLight, 'intensity').min(0).max(10).step(0.01);
-
-
-// const controls = new OrbitControls( camera, renderer.domElement );
-// controls.update();
 
 
 window.addEventListener('resize', () => {
@@ -154,7 +137,7 @@ window.addEventListener( 'click', (e) => {
 
     raycasterLocal.setFromCamera(mouse, camera);
 
-    const intersects = raycaster.intersectObjects(navigation.children);
+    const intersects = raycaster.intersectObjects(navigation.labels.children);
     if(intersects.length > 0) {
         cam1 = !cam1;
     }
