@@ -1,4 +1,6 @@
 import * as THREE from "three";
+import {MathUtils} from "three";
+import {geometry} from "./ui-constants";
 
 
 export default class Navigation {
@@ -7,21 +9,11 @@ export default class Navigation {
     lights = new THREE.Group();
     navigationGroup = new THREE.Group();
     viewpoints = new Set();
-    cameraLabelGeometry;
     sizes;
     currentCamera;
 
 
     constructor(sizes, camera) {
-        const cameraLabelHeight = 0.3;
-        const cameraLabelRadius = 0.3;
-        const cameraLabelRadialSegments = 8;
-        const cameraLabelHeightSegments = 1;
-        const cameraLabelThetaStart = 0;
-        const isCameraLabelOpenEnded = false;
-
-        this.cameraLabelGeometry = new THREE.ConeGeometry(cameraLabelRadius, cameraLabelHeight, cameraLabelRadialSegments,
-            cameraLabelHeightSegments, isCameraLabelOpenEnded, cameraLabelThetaStart);
         this.sizes = sizes;
         this.currentCamera = camera;
 
@@ -30,11 +22,42 @@ export default class Navigation {
         this.navigationGroup.add(this.lights);
     }
 
-    addViewpoint(position, rotation) {
-        const cameraLabelColor = 0x00ff00;
-        const cameraLabelMaterial = new THREE.MeshBasicMaterial( { color: cameraLabelColor } );
-        const cameraLabel = new THREE.Mesh(this.cameraLabelGeometry, cameraLabelMaterial);
+    addViewpoint(position, rotation, type) {
+        const cameraLabelColor = 0x009374;
+        let cameraLabelGeometry;
+        switch (type) {
+            case geometry.CONE:
+                cameraLabelGeometry = this.createConeGeometry();
+                break;
+            case geometry.SPHERE:
+                cameraLabelGeometry = this.createSphereGeometry();
+                break;
+            default:
+                cameraLabelGeometry = this.createConeGeometry();
+        }
+        const cameraLabelMaterial = new THREE.MeshStandardMaterial( { color: cameraLabelColor } );
+        cameraLabelMaterial.transparent = true;
+        cameraLabelMaterial.opacity = 0.7;
+        const cameraLabel = new THREE.Mesh(cameraLabelGeometry, cameraLabelMaterial);
         cameraLabel.position.set(position.x, position.y, position.z);
+        cameraLabel.rotation.z = MathUtils.degToRad(180);
+
+        const radiansPerSecond = MathUtils.degToRad(30);
+        console.log(radiansPerSecond);
+
+        let currentPos = cameraLabel.position.y;
+        cameraLabel.tick = (delta, time, hover) => {
+            cameraLabel.rotation.y += radiansPerSecond * delta;
+
+            if(hover === true) {
+                cameraLabel.position.y += (Math.sin(time*10) / 100);
+                return;
+            }
+
+            cameraLabel.position.y = currentPos + (Math.sin(time) / 1000);
+
+            currentPos = cameraLabel.position.y;
+        };
 
         const camera = new THREE.PerspectiveCamera(45, this.sizes.width / this.sizes.height, 0.1, 100);
         camera.rotation.set(rotation.x, rotation.y, rotation.z);
@@ -47,6 +70,26 @@ export default class Navigation {
         this.cameras.add(camera);
 
         return viewpoint;
+    }
+
+    createConeGeometry() {
+        const cameraLabelHeight = 0.5;
+        const cameraLabelRadius = 0.3;
+        const cameraLabelRadialSegments = 20;
+        const cameraLabelHeightSegments = 1
+        const cameraLabelThetaStart = 0;
+        const isCameraLabelOpenEnded = false;
+
+        return new THREE.ConeGeometry(cameraLabelRadius, cameraLabelHeight, cameraLabelRadialSegments,
+            cameraLabelHeightSegments, isCameraLabelOpenEnded, cameraLabelThetaStart);
+    }
+
+    createSphereGeometry() {
+        const cameraLabelRadius = 0.25;
+        const cameraLabelWidthSegments = 32;
+        const cameraLabelHeightSegments = 16;
+
+        return new THREE.SphereGeometry(cameraLabelRadius, cameraLabelWidthSegments, cameraLabelHeightSegments);
     }
 
     highlightViewpoint(viewpoint) {

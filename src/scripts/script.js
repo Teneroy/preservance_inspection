@@ -3,11 +3,13 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 //import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import GuiDebug from './gui-debug';
-import {Raycaster} from "three";
+import {MathUtils, Raycaster} from "three";
 import Navigation from "./navigation";
 import {resize, loadModel, updateMouseCoordinates} from "./ui-functions";
+import {geometry} from "./ui-constants";
 
 //Scene vars
+const clock = new THREE.Clock();
 const guiDebug = new GuiDebug();
 const canvas = document.querySelector('.webgl');
 const scene = new THREE.Scene();
@@ -25,13 +27,21 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
 document.body.appendChild( renderer.domElement );
 
-var cam1 = false;
-
 const camera = new THREE.PerspectiveCamera(50, sizes.width / sizes.height, 0.1, 100);
-camera.position.set(0, 3, 10);
+camera.position.set(0, 0, 10);
+camera.rotation.set(0, 0, 0);
+
+
 scene.add(camera);
 
+const axesHelper = new THREE.AxesHelper( 5 );
+scene.add( axesHelper );
+
 const navigation = new Navigation(sizes, camera);
+
+const topViewpoint = navigation.addViewpoint({x: 3, y: 3.3, z: 0}, {x: 0, y: 0, z: 0}, geometry.SPHERE);
+topViewpoint.camera.rotateY(MathUtils.degToRad(90));
+topViewpoint.camera.rotateX(MathUtils.degToRad(320));
 
 const pointLight = new THREE.PointLight();
 pointLight.position.set(2, 6, 4);
@@ -41,13 +51,13 @@ const navStep = 1.1;
 const firstNavZ = 1.1;
 const lastNavZ = -1.1;
 for (let z = firstNavZ; z >= lastNavZ; z -= navStep) {
-    const viewpoint = navigation.addViewpoint({x: 3, y: 0.23, z: z}, {x: 0, y: 7.88, z: 0});
+    const viewpoint = navigation.addViewpoint({x: 3, y: 0.23, z: z}, {x: 0, y: 7.88, z: 0}, geometry.CONE);
     navigation.highlightViewpoint(viewpoint);
 }
 scene.add(navigation.navigationGroup);
 
 //Event listeners
-document.querySelector('.toggle-cam').addEventListener('click', (e) => cam1 = !cam1);
+document.querySelector('.toggle-cam').addEventListener('click', (e) => 1);
 window.addEventListener('mousemove', (e) => updateMouseCoordinates(mouse, sizes, {x: e.clientX, y: e.clientY}));
 window.addEventListener('resize', () => resize(sizes, camera, renderer));
 window.addEventListener( 'click', (e) => {
@@ -71,17 +81,24 @@ loader.load( 'Perseverance.glb', (gltf) => loadModel(scene, gltf.scene), undefin
 const tick = () => {
     renderer.render(scene, navigation.currentCamera);
 
+    const delta = clock.getDelta();
+    const time = clock.getElapsedTime();
+
     raycaster.setFromCamera(mouse, camera);
     const intersects = raycaster.intersectObjects(navigation.labels.children);
 
     const navElems = navigation.labels.children;
+
     for (let i = 0; i < navElems.length; i++) {
-        navElems[i].material.color.set( 0x00ff00 );
+        if(intersects.length > 0 && navElems[i] === intersects[0].object) {
+            navElems[i].material.color.set( 0x59ff );
+            navElems[i].tick(delta, time, true);
+            continue;
+        }
+        navElems[i].material.color.set( 0x009374 );
+        navElems[i].tick(delta, time, false);
     }
 
-    if(intersects.length > 0) {
-        intersects[0].object.material.color.set( 0x000000 );
-    }
 
     window.requestAnimationFrame(tick);
 }
@@ -114,3 +131,5 @@ navigation.viewpoints.forEach(viewpoint => {
     guiDebug.getFolderByName(lightFolderName)
         .add(viewpoint.light, 'intensity').min(0).max(10).step(0.01);
 });
+
+guiDebug.addRotationDebugger(navigation.labels.children[0], 'Nav rotation', rotationRange, rotationRange, rotationRange, 0.01);
