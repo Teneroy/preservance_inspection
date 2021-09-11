@@ -11,10 +11,37 @@ body {
     background-image: url("img/background.jpeg");
 }
 
+footer {
+    bottom: 0;
+    position: fixed;
+    display: block;
+    width: 100%;
+}
+
 .webgl {
     position: fixed;
     top: 0;
     left: 0;
     outline: none;
     z-index: -10000;
+}
+
+.navigation-buttons {
+    display: block;
+    width: max-content;
+    margin: auto;
+}
+
+.navigation-buttons button {
+    display: none;
+    font-size: 18px;
+    background: none;
+    border: 0;
+    color: #009374;
+    cursor: pointer;
+    transition: 0.3s all;
+}
+
+.navigation-buttons button:hover {
+    color: #59ff;
 }

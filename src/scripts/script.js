@@ -1,17 +1,22 @@
 import '../style.css';
+import '@fortawesome/fontawesome-free/js/fontawesome'
+import '@fortawesome/fontawesome-free/js/solid'
+import '@fortawesome/fontawesome-free/js/regular'
+import '@fortawesome/fontawesome-free/js/brands'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 //import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import GuiDebug from './gui-debug';
 import {MathUtils, Raycaster} from "three";
 import Navigation from "./navigation";
-import {resize, loadModel, updateMouseCoordinates} from "./ui-functions";
+import {resize, loadModel, updateMouseCoordinates, associateButtons} from "./ui-functions";
 import {geometry} from "./ui-constants";
 
 //Scene vars
 const clock = new THREE.Clock();
 const guiDebug = new GuiDebug();
 const canvas = document.querySelector('.webgl');
+const canvasPreview = document.querySelector('.webgl-preview');
 const scene = new THREE.Scene();
 const loader = new GLTFLoader();
 const raycaster = new Raycaster();
@@ -19,17 +24,25 @@ const sizes = {
     width: window.innerWidth,
     height: window.innerHeight
 };
+
+const previewMargin = {
+    left: 0,
+    top: 0
+};
 const mouse = new THREE.Vector2();
 
 const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
+const rendererPreview = new THREE.WebGLRenderer({ canvas: canvasPreview, alpha: true });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+rendererPreview.setSize(canvasPreview.clientWidth, canvasPreview.clientHeight);
+rendererPreview.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
 document.body.appendChild( renderer.domElement );
 
 const camera = new THREE.PerspectiveCamera(50, sizes.width / sizes.height, 0.1, 100);
-camera.position.set(0, 0, 10);
-camera.rotation.set(0, 0, 0);
+camera.position.set(7.07, 1.56, 7.07);
+camera.rotation.set(0, 0.73, 0);
 
 
 scene.add(camera);
@@ -58,7 +71,11 @@ scene.add(navigation.navigationGroup);
 
 //Event listeners
 document.querySelector('.toggle-cam').addEventListener('click', (e) => 1);
-window.addEventListener('mousemove', (e) => updateMouseCoordinates(mouse, sizes, {x: e.clientX, y: e.clientY}));
+window.addEventListener('mousemove', (e) => {
+    updateMouseCoordinates(mouse, sizes, {x: e.clientX, y: e.clientY});
+    previewMargin.top = e.clientY;
+    previewMargin.left = e.clientX;
+});
 window.addEventListener('resize', () => resize(sizes, camera, renderer));
 window.addEventListener( 'click', (e) => {
     console.log(e);
@@ -78,14 +95,45 @@ window.addEventListener( 'click', (e) => {
 //loading a model
 loader.load( 'Perseverance.glb', (gltf) => loadModel(scene, gltf.scene), undefined, ( error ) => console.error( error ));
 
+
 const tick = () => {
     renderer.render(scene, navigation.currentCamera);
+
+    if(navigation.currentCamera !== camera) {
+        const btns = associateButtons(navigation);
+        document.querySelector('.navigation-buttons').style.display = 'block';
+        document.querySelectorAll('.nav-btn').forEach(elem => {
+            elem.style.display = 'none';
+        });
+        for (let btn of btns) {
+            document.querySelector(btn.type).style.display = 'inline-block';
+            document.querySelector(btn.type).addEventListener('click', (e) => {
+                navigation.currentCamera = btn.elem.camera;
+                console.log("1");
+            });
+        }
+    } else {
+        document.querySelector('.navigation-buttons').style.display = 'none';
+    }
 
     const delta = clock.getDelta();
     const time = clock.getElapsedTime();
 
+    canvasPreview.style.display = 'none';
+
     raycaster.setFromCamera(mouse, camera);
     const intersects = raycaster.intersectObjects(navigation.labels.children);
+
+    let previewCamera = navigation.currentCamera;
+
+    if(intersects.length > 0 && navigation.currentCamera === camera) {
+        previewCamera = navigation.findViewpointByLabel(intersects[0].object).camera;
+        canvasPreview.style.display = 'block';
+        canvasPreview.style.top = previewMargin.top + 'px';
+        canvasPreview.style.left = previewMargin.left + 'px';
+    }
+
+    rendererPreview.render(scene, previewCamera);
 
     const navElems = navigation.labels.children;
 
