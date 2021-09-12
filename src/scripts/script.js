@@ -109,7 +109,7 @@ const tick = () => {
             document.querySelector(btn.type).style.display = 'inline-block';
             document.querySelector(btn.type).addEventListener('click', (e) => {
                 navigation.currentCamera = btn.elem.camera;
-                console.log("1");
+                console.log(btn.elem.camera.position.z);
             });
         }
     } else {

@@ -22,13 +22,7 @@ function associateButtons(navigation) {
         if(elems.length === 0)
             return elems;
 
-        let temp = elems[0];
-        for (let i = 0; i < elems.length; i++) {
-            if(temp.camera.position.z < elems[i].camera.position.z) {
-                elems[i] = temp;
-            }
-        }
-        return elems;
+        return elems.sort((a,b) => (Math.abs(a.camera.position.z) > Math.abs(b.camera.position.z)) ? 1 : 0);
     }
 
     const position = {
@@ -45,9 +39,9 @@ function associateButtons(navigation) {
             case position.DOWN:
                 return elem.camera.position.y < currentCamera.position.y ? elem : null;
             case position.LEFT:
-                return elem.camera.position.z < currentCamera.position.z ? elem : null;
+                return elem.camera.position.z > currentCamera.position.z && elem.camera.position.y === currentCamera.position.y ? elem : null;
             case position.RIGHT:
-                return elem.camera.position.z > currentCamera.position.z ? elem : null;
+                return elem.camera.position.z < currentCamera.position.z && elem.camera.position.y === currentCamera.position.y ? elem : null;
         }
     }
 
