@@ -45,35 +45,35 @@ function associateButtons(navigation) {
         }
     }
 
-    const getElemsByPosition = (currentCamera, elements, pos) => {
-        const elems = [];
-        for (let elem of elements) {
-            const posElem = getElemByPosition(currentCamera, elem, pos);
-            if(posElem !== null) {
-                elems.push(posElem);
+    const results = [];
+    const topElems = [];
+    const leftElems = [];
+    const rightElems = [];
+
+    const sides = [{ pos: position.TOP, data: topElems },{ pos: position.LEFT, data: leftElems }, { pos: position.RIGHT, data: rightElems }];
+
+    for (let elem of navigation.viewpoints) {
+        const downElem = getElemByPosition(navigation.currentCamera, elem, position.DOWN);
+        if(downElem !== null) {
+            return [{ type: '.down', elem: downElem }];
+        }
+
+        for (const side of sides) {
+            const sideElem = getElemByPosition(navigation.currentCamera, elem, side.pos);
+            if(sideElem !== null) {
+                side.data.push(sideElem);
             }
         }
-        return sortElemsByDistance(elems);
-    };
-
-    const downElems = getElemsByPosition(navigation.currentCamera, navigation.viewpoints, position.DOWN);
-    if(downElems.length > 0) {
-        return [{ type: '.down', elem: downElems[(downElems.length / 2).toFixed(0)] }];
     }
 
-    const results = [];
-    const topElems = getElemsByPosition(navigation.currentCamera, navigation.viewpoints, position.TOP);
-    const leftElems = getElemsByPosition(navigation.currentCamera, navigation.viewpoints, position.LEFT);
-    const rightElems = getElemsByPosition(navigation.currentCamera, navigation.viewpoints, position.RIGHT);
-
     if(topElems.length > 0)
-        results.push({ type: '.up', elem: topElems[0] });
+        results.push({ type: '.up', elem: sortElemsByDistance(topElems)[0] });
 
     if(leftElems.length > 0)
-        results.push({ type: '.left', elem: leftElems[0] });
+        results.push({ type: '.left', elem: sortElemsByDistance(leftElems)[0] });
 
     if(rightElems.length > 0)
-        results.push({ type: '.right', elem: rightElems[0] });
+        results.push({ type: '.right', elem: sortElemsByDistance(rightElems)[0] });
 
     return results;
 }
