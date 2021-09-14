@@ -39,7 +39,7 @@ footer {
     border: 0;
     color: #009374;
     cursor: pointer;
-    transition: 0.3s all;
+    transition: 0.15s all;
 }
 
 .navigation-buttons button:hover {

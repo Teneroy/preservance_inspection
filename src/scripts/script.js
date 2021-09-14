@@ -70,7 +70,10 @@ for (let z = firstNavZ; z >= lastNavZ; z -= navStep) {
 scene.add(navigation.navigationGroup);
 
 //Event listeners
-document.querySelector('.toggle-cam').addEventListener('click', (e) => 1);
+document.querySelector('.main').style.display = 'inline-block';
+document.querySelector('.main').addEventListener('click', (e) => {
+    navigation.currentCamera = camera;
+});
 window.addEventListener('mousemove', (e) => {
     updateMouseCoordinates(mouse, sizes, {x: e.clientX, y: e.clientY});
     previewMargin.top = e.clientY;
@@ -78,7 +81,6 @@ window.addEventListener('mousemove', (e) => {
 });
 window.addEventListener('resize', () => resize(sizes, camera, renderer));
 window.addEventListener( 'click', (e) => {
-    console.log(e);
     const raycasterLocal = new Raycaster();
 
     const mouse2 = new THREE.Vector2();
@@ -103,6 +105,8 @@ const tick = () => {
         const btns = associateButtons(navigation);
         document.querySelector('.navigation-buttons').style.display = 'block';
         document.querySelectorAll('.nav-btn').forEach(elem => {
+            if(elem.classList.contains('main'))
+                return;
             elem.style.display = 'none';
         });
         for (let btn of btns) {
