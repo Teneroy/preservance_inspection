@@ -57,8 +57,11 @@ topViewpoint.camera.rotateY(MathUtils.degToRad(90));
 topViewpoint.camera.rotateX(MathUtils.degToRad(320));
 
 const pointLight = new THREE.PointLight();
-pointLight.position.set(2, 6, 4);
+pointLight.position.set(4, 12, 8);
 scene.add(pointLight);
+
+const ambientLight = new THREE.AmbientLight('white', 0.3);
+scene.add(ambientLight);
 
 const navStep = 1.1;
 const firstNavZ = 1.1;
