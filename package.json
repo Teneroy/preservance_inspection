@@ -1,7 +1,7 @@
 {
   "name": "preservance_inspection",
   "version": "1.0.0",
-  "description": "Visual observation of the Preservance rover from different positions. A test task by one of German research institutes.",
+  "description": "Visual observation of the Perseverance rover from different positions. A test task by one of German research institutes.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -15,7 +15,7 @@
   "author": "Aleksei Chernyshov",
   "license": "ISC",
   "bugs": {
-    "url": "yeshttps://github.com/Teneroy/preservance_inspection/issues"
+    "url": "https://github.com/Teneroy/preservance_inspection/issues"
   },
   "homepage": "https://github.com/Teneroy/preservance_inspection#readme",
   "dependencies": {
@@ -25,7 +25,6 @@
     "babel-loader": "^8.2.2",
     "copy-webpack-plugin": "^9.0.1",
     "css-loader": "^6.2.0",
-    "dat.gui": "^0.7.7",
     "html-loader": "^2.1.2",
     "internal-ip": "^6.2.0",
     "three": "^0.132.2",

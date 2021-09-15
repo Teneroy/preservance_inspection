@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import {MathUtils} from "three";
-import {geometry} from "./ui-constants";
+import {geometry} from "./ui/ui-constants";
 
 
 export default class Navigation {
@@ -114,5 +114,20 @@ export default class Navigation {
             }
         }
         return null;
+    }
+
+    animate(intersects, clock) {
+        const delta = clock.getDelta();
+        const time = clock.getElapsedTime();
+        const navElems = this.labels.children;
+        for (const elem of navElems) {
+            if(intersects.length > 0 && elem === intersects[0].object) {
+                elem.material.color.set( 0x59ff );
+                elem.tick(delta, time, true);
+                continue;
+            }
+            elem.material.color.set( 0x009374 );
+            elem.tick(delta, time, false);
+        }
     }
 }
