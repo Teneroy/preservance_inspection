@@ -31,8 +31,20 @@ const previewMargin = {
 };
 const mouse = new THREE.Vector2();
 
-const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
-const rendererPreview = new THREE.WebGLRenderer({ canvas: canvasPreview, alpha: true });
+const renderer = new THREE.WebGLRenderer({ canvas: canvas });
+const textureLoader = new THREE.TextureLoader();
+const texture = textureLoader.load(
+    'background_panorama_blurred.jpg',
+    () => {
+        console.log("Text load");
+        const rt = new THREE.WebGLCubeRenderTarget(texture.image.height);
+        rt.fromEquirectangularTexture(renderer, texture);
+        scene.background = rt.texture;
+    },
+    (e) => {
+        console.error(e);
+    });
+const rendererPreview = new THREE.WebGLRenderer({ canvas: canvasPreview });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 rendererPreview.setSize(canvasPreview.clientWidth, canvasPreview.clientHeight);
