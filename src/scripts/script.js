@@ -5,8 +5,6 @@ import '@fortawesome/fontawesome-free/js/regular'
 import '@fortawesome/fontawesome-free/js/brands'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-//import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import GuiDebug from './gui-debug';
 import {MathUtils, Raycaster} from "three";
 import Navigation from "./navigation";
 import {resize, loadModel, updateMouseCoordinates, associateButtons} from "./ui-functions";
@@ -14,7 +12,6 @@ import {geometry} from "./ui-constants";
 
 //Scene vars
 const clock = new THREE.Clock();
-const guiDebug = new GuiDebug();
 const canvas = document.querySelector('.webgl');
 const canvasPreview = document.querySelector('.webgl-preview');
 const scene = new THREE.Scene();
@@ -36,7 +33,6 @@ const textureLoader = new THREE.TextureLoader();
 const texture = textureLoader.load(
     'background_panorama_blurred.jpg',
     () => {
-        console.log("Text load");
         const rt = new THREE.WebGLCubeRenderTarget(texture.image.height);
         rt.fromEquirectangularTexture(renderer, texture);
         scene.background = rt.texture;
@@ -55,12 +51,7 @@ document.body.appendChild( renderer.domElement );
 const camera = new THREE.PerspectiveCamera(50, sizes.width / sizes.height, 0.1, 100);
 camera.position.set(7.07, 1.56, 7.07);
 camera.rotation.set(0, 0.73, 0);
-
-
 scene.add(camera);
-
-const axesHelper = new THREE.AxesHelper( 5 );
-scene.add( axesHelper );
 
 const navigation = new Navigation(sizes, camera);
 
@@ -128,7 +119,6 @@ const tick = () => {
             document.querySelector(btn.type).style.display = 'inline-block';
             document.querySelector(btn.type).addEventListener('click', (e) => {
                 navigation.currentCamera = btn.elem.camera;
-                console.log(btn.elem.camera.position.z);
             });
         }
     } else {
@@ -171,32 +161,3 @@ const tick = () => {
 }
 
 tick();
-
-
-
-
-//Debugging
-const rotationRange = {min: 0, max: 9};
-guiDebug.addRotationDebugger(camera, 'Camera rotation', rotationRange, rotationRange, rotationRange, 0.01);
-guiDebug.addPositionDebugger(camera, 'Camera position', {min: -10, max: 10}, {min: -10, max: 10},
-    {min: -10, max: 10}, 0.01);
-
-guiDebug.addPositionDebugger(pointLight, 'Light position', {min: -6, max: 6}, {min: -3, max: 3},
-    {min: -3, max: 3}, 0.01);
-guiDebug.getFolderByName('Light position')
-    .add(pointLight, 'intensity').min(0).max(10).step(0.01);
-
-
-let i = 0;
-navigation.viewpoints.forEach(viewpoint => {
-    if(viewpoint.light === null)
-        return;
-
-    const lightFolderName = ('Light number: ' + (i++));
-    guiDebug.addPositionDebugger(viewpoint.light, lightFolderName, {min: -6, max: 6}, {min: -3, max: 3},
-        {min: -3, max: 3}, 0.01);
-    guiDebug.getFolderByName(lightFolderName)
-        .add(viewpoint.light, 'intensity').min(0).max(10).step(0.01);
-});
-
-guiDebug.addRotationDebugger(navigation.labels.children[0], 'Nav rotation', rotationRange, rotationRange, rotationRange, 0.01);
