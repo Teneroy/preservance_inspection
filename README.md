@@ -8,6 +8,17 @@ By clicking on arrows, you can navigate to the nearby viewpoints.
 
 ## Installation and run
 In order to install this project, you should run the command:
+
 `npm i`
+
 If you want to start the project, you should run:
+
 `npm run dev`
+
+## Tools 
+In order to develop this application, those tools were used:
+* WebStorm 2021.2
+* npm 7.5.2
+
+## Dependencies
+All the necessary dependencies can be found in package.json file
