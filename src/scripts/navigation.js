@@ -3,15 +3,44 @@ import {MathUtils} from "three";
 import {geometry} from "./ui/ui-constants";
 
 
+/**
+ * Class contains viewpoints as well as helping objects and methods related to those viewpoints
+ * */
 export default class Navigation {
+    /**
+     * Group, contains cameras
+     * */
     cameras = new THREE.Group();
-    labels = new THREE.Group();
-    lights = new THREE.Group();
-    navigationGroup = new THREE.Group();
-    viewpoints = new Set();
-    sizes;
-    currentCamera;
 
+    /**
+     * Group, contains viewpoint geometry
+     * */
+    labels = new THREE.Group();
+
+    /**
+     * Group, contains lights in order to better highlight elements
+     * */
+    lights = new THREE.Group();
+
+    /**
+     * Group, contains cameras, labels, and lights
+     * */
+    navigationGroup = new THREE.Group();
+
+    /**
+     * Set contains objects with such parameters as camera, light, and label those fully describes viewpoint
+     * */
+    viewpoints = new Set();
+
+    /**
+     * Sizes object with width and height parameters
+     * */
+    sizes;
+
+    /**
+     * Current active camera
+     * */
+    currentCamera;
 
     constructor(sizes, camera) {
         this.sizes = sizes;
@@ -22,6 +51,13 @@ export default class Navigation {
         this.navigationGroup.add(this.lights);
     }
 
+    /**
+     * Adding new viewpoint to the scene
+     * @param position Position object with x,y,z coordinates
+     * @param rotation Rotation object with x,y,z coordinates
+     * @param type Label geometry type
+     * @return new viewpoint
+     * */
     addViewpoint(position, rotation, type) {
         const cameraLabelColor = 0x009374;
         let cameraLabelGeometry;
@@ -72,6 +108,10 @@ export default class Navigation {
         return viewpoint;
     }
 
+    /**
+     * Creates new ConeGeometry
+     * @return ConeGeometry
+     * */
     createConeGeometry() {
         const cameraLabelHeight = 0.5;
         const cameraLabelRadius = 0.3;
@@ -84,6 +124,10 @@ export default class Navigation {
             cameraLabelHeightSegments, isCameraLabelOpenEnded, cameraLabelThetaStart);
     }
 
+    /**
+     * Creates SphereGeometry
+     * @return SphereGeometry
+     * */
     createSphereGeometry() {
         const cameraLabelRadius = 0.25;
         const cameraLabelWidthSegments = 32;
@@ -92,6 +136,11 @@ export default class Navigation {
         return new THREE.SphereGeometry(cameraLabelRadius, cameraLabelWidthSegments, cameraLabelHeightSegments);
     }
 
+    /**
+     * Creates new point light to highlight viewpoint
+     * @param viewpoint Viewpoint object
+     * @return pointLight new point light
+     * */
     highlightViewpoint(viewpoint) {
         if(!this.viewpoints.has(viewpoint)) {
             return null;
@@ -107,6 +156,11 @@ export default class Navigation {
         return pointLight;
     }
 
+    /**
+     * Find viewpoint by label(geometry)
+     * @param label Geometry object that describes viewpoint
+     * @return viewpoints if object has been found or null if has not
+     * */
     findViewpointByLabel(label) {
         for (let viewpoint of this.viewpoints) {
             if(viewpoint.label === label) {
@@ -116,6 +170,11 @@ export default class Navigation {
         return null;
     }
 
+    /**
+     * Animates and colors all viewpoints
+     * @param intersects Array with intersected objects
+     * @param clock Object with time logic
+     * */
     animate(intersects, clock) {
         const delta = clock.getDelta();
         const time = clock.getElapsedTime();

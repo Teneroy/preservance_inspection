@@ -7,7 +7,7 @@ import {MathUtils} from "three";
  * Creates renderer of the specific size for a specific canvas
  * @param size Renderers size object with with and height parameters
  * @param canvas Renderers canvas
- * @return Created and configured renderer
+ * @return renderer Created and configured renderer
  * */
 function createRenderer(canvas, size) {
     const renderer = new THREE.WebGLRenderer({ canvas: canvas });
@@ -16,6 +16,13 @@ function createRenderer(canvas, size) {
     return renderer;
 }
 
+/**
+ * Loads 360 degree texture as scene background
+ * @param scene Scene that we are creating background for
+ * @param renderer Scene renderer
+ * @param url HDRI url
+ * @return texture Loaded texture object
+ * */
 function hdriBackgroundLoad(scene, renderer, url) {
     const textureLoader = new THREE.TextureLoader();
     const texture = textureLoader.load(
@@ -32,6 +39,12 @@ function hdriBackgroundLoad(scene, renderer, url) {
     return texture;
 }
 
+/**
+ * Resize event handler. Updates sizes parameters, camera, and renderer size
+ * @param sizes Sizes object with width and height parameters
+ * @param camera Camera object
+ * @param renderer Scene renderer
+ * */
 function resize(sizes, camera, renderer) {
     sizes.width = window.innerWidth;
     sizes.height = window.innerHeight;
@@ -43,12 +56,23 @@ function resize(sizes, camera, renderer) {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 }
 
+/**
+ * Load event handler. Configuring model and adding it to the scene
+ * @param scene Scene we add model to
+ * @param model Model we configure
+ * */
 function loadModel(scene, model) {
     model.scale.set(1, 1, 1);
     model.position.set(0, 0, 0);
     scene.add( model );
 }
 
+/**
+ * Figures out which navigation buttons to display by current camera position.
+ * @param navigation Navigation objet that contains all the cameras and labels for the navigation
+ * @return [{type: string, elem: object}, ...] Array with objects those contain type(e.g. html class of the button)
+ *      and elem which is viewpoint object
+ * */
 function associateButtons(navigation) {
     const sortElemsByDistance = (elems) => {
         if(elems.length === 0)
@@ -110,18 +134,36 @@ function associateButtons(navigation) {
     return results;
 }
 
+/**
+ * Updates mouse coordinates in scene with respect to the size and DOM coordinates
+ * @param mouse Mouse object with x and y parameters
+ * @param sizes Sizes object with width and height parameters
+ * @param coordinates DOM mouse coordinates based on Event object
+ * */
 function updateMouseCoordinates(mouse, sizes, coordinates) {
     mouse.x = coordinates.x / sizes.width * 2 - 1;
     mouse.y = - (coordinates.y / sizes.height) * 2 + 1;
 }
 
+/**
+ * Creates point light and set the position in scene
+ * @param x - position by x axis
+ * @param y - position by y axis
+ * @param z - position by z axis
+ * @return pointLight Returns created piint light object
+ * */
 function createPointLight(x, y, z) {
     const pointLight = new THREE.PointLight();
     pointLight.position.set(x, y, z);
     return pointLight;
 }
 
-function createViewpoints(navigation, ) {
+/**
+ * Creates scene viewpoints
+ * @param navigation Navigation objet that contains all the cameras and labels for the navigation
+ * @return navigation.navigationGroup Navigation group that contains all other groups related to the navigation
+ * */
+function createViewpoints(navigation) {
     const topViewpoint = navigation.addViewpoint({x: 3, y: 3.3, z: 0}, {x: 0, y: 0, z: 0}, geometry.SPHERE);
     topViewpoint.camera.rotateY(MathUtils.degToRad(90));
     topViewpoint.camera.rotateX(MathUtils.degToRad(320));
@@ -136,6 +178,13 @@ function createViewpoints(navigation, ) {
     return navigation.navigationGroup;
 }
 
+/**
+ * Adding all the necessary event listeners
+ * @param navigation Navigation objet that contains all the cameras and labels for the navigation
+ * @param camera Main camera object
+ * @param mouse Mouse position object
+ * @param raycaster Scene raycaster
+ * */
 function initEventListeners(navigation, camera, mouse, raycaster) {
     document.querySelector('.main').addEventListener('click', () => navigation.currentCamera = camera);
     window.addEventListener('mousemove', (e) => {
@@ -152,6 +201,11 @@ function initEventListeners(navigation, camera, mouse, raycaster) {
     });
 }
 
+/**
+ * Displays HTML buttons
+ * @param buttons Array with objects those contain type(e.g. html class of the button) and elem which is viewpoint object
+ * @param navigation Navigation objet that contains all the cameras and labels for the navigation
+ * */
 function displayButtons(buttons, navigation) {
     document.querySelector('.navigation-buttons').style.display = 'block';
     document.querySelectorAll('.nav-btn').forEach(elem => {
